@@ -12,7 +12,9 @@ int main()
     ifstream fin;
 
     // Read the maze from the file.
-    string fileName = "maze.txt";
+    string fileName = "Maze1.txt";
+
+
 
     fin.open(fileName.c_str());
     if (!fin)
@@ -40,4 +42,6 @@ int main()
     {
         cout << ex.what() << endl; exit(1);
     }
+
+
 }

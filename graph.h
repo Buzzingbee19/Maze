@@ -2,6 +2,8 @@
 #include <fstream>
 #include "d_matrix.h"
 #include "d_except.h"
+#include "node.h"
+#include "edge.h"
 #include <list>
 #include <stack>
 
@@ -10,7 +12,7 @@ using namespace std;
 typedef int WeightType;
 typedef int NodeType;
 
-int const MaxNumNodex = 9999;
+//int const MaxNumNodex = 9999;
 
 typedef int NodeWeight;
 typedef int EdgeWeight;
@@ -497,14 +499,13 @@ void graph::unVisit(int i, int j)
 
    edges[i][j].unVisit();
 }
-I
+
 bool graph::isVisited(int i) const
 // Return true if node has been visited.  Otherwise return false.  Throws an
 // exception if i is too large or too small.
 {
    if (i < 0 || i >= numNodes())
       throw rangeError("Bad value in graph::getEdge");
-I
    return nodes[i].isVisited();
 }
    
@@ -550,4 +551,4 @@ bool graph::allNodesMarked()
 	 return false;
 
    return true;
-}I
+}

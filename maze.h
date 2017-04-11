@@ -32,11 +32,13 @@ class maze
 void maze::setMap(int i, int j, int n)
 // Set mapping from maze cell (i,j) to graph node n. 
 {
+    this->map[i][j] = n;
 }
 
 int maze ::getMap(int i, int j) const
 // Return mapping of maze cell (i,j) in the graph.
 {
+    return this->map[i][j];
 }
 
 maze::maze(ifstream &fin)
