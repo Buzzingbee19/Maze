@@ -75,7 +75,8 @@ class graph
 
     vector<int> getNeighbors(int n);
     void unVisitAll();
-    vector<edge> getPaths(int n);
+    vector<edge> getEdges(int n);
+    vector<edge> getFirstNewEdge(int n);
     void setEnd(int n);
     bool isEnd(int n);
 
@@ -576,12 +577,12 @@ vector<int> graph::getNeighbors(int n) {
 void graph::unVisitAll()
 // clear the visited fields on every node in this graph
 {
-    for(node n : this->nodes) {
-        n.unVisit();
+    for(int i = 0; i < numNodes(); i++) {
+       unVisit(i);
     }
 }
 
-vector<edge> graph::getPaths(int n)
+vector<edge> graph::getEdges(int n)
 // find all the paths out from the given node
 {
    vector<edge> paths;
@@ -591,6 +592,23 @@ vector<edge> graph::getPaths(int n)
          paths.push_back(this->edges[n][i]);
       }
    }
+   return paths;
+}
+
+vector<edge> graph::getFirstNewEdge(int n)
+// return a vector containing the first unvisited edge from the given node
+//   if none, return the empty vector
+{
+   vector<edge> paths;
+
+   for(int i = 0; i < this->nodes.size(); i++) {
+      if(this->edges[n][i].isValid() && !this->edges[n][i].isVisited()) {
+         paths.push_back(this->edges[n][i]);
+         this->edges[n][i].visit();
+         return paths;
+      }
+   }
+
    return paths;
 }
 

@@ -79,6 +79,8 @@ edge::edge(const edge &e)
 {
    setEdge(e.source, e.dest, e.getWeight());
 
+   setInstructions(e.instructions);
+
    if (e.isValid())
       setValid();
    else

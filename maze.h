@@ -25,8 +25,12 @@ class maze
 
       bool isLegal(int i, int j);
 
-      void findPathRecursive(graph& g, int nodeIndex, bool& pathFound, stack<edge> pathAcc);
-      void findPathNonRecursive(graph& g, int nodeIndex = 0);
+      stack<edge> findPathRecursive(graph& g, int nodeIndex, bool& pathFound);
+      stack<edge> findPathNonRecursive(graph& g, int nodeIndex = 0);
+
+        pair<int, int> nodeLookup(int n);
+        int getRows();
+        int getCols();
 
 
    private:
@@ -120,6 +124,19 @@ bool maze::isLegal(int i, int j)
     return (i >= 0 && i < rows && j >= 0 && j < cols);
 }
 
+int maze::getRows()
+// return the number of rows in the maze
+{
+    return this->rows;
+}
+
+int maze::getCols()
+// return the number of rows in the maze
+{
+    return this->cols;
+}
+
+
 void maze::mapMazeToGraph(graph &g)
 // Create a graph g that represents the legal moves in the maze m.
 {
@@ -145,33 +162,32 @@ void maze::mapMazeToGraph(graph &g)
                     //look right and connect
                 {
                     int toIndex = this->map[i][j + 1];
-                    g.addEdge(fromIndex, toIndex, 0, "go right");
+                    g.addEdge(fromIndex, toIndex, 1, "go right");
                 }
                 if (isLegal(i, j - 1) && this->value[i][j - 1])
                     //look left and connect
                 {
                     int toIndex = this->map[i][j - 1];
-                    g.addEdge(fromIndex, toIndex, 0, "go left");
+                    g.addEdge(fromIndex, toIndex, 1, "go left");
                 }
                 if (isLegal(i + 1, j) && this->value[i + 1][j])
                     //look down and connect
                 {
                     int toIndex = this->map[i + 1][j];
-                    g.addEdge(fromIndex, toIndex, 0, "go down");
+                    g.addEdge(fromIndex, toIndex, 1, "go down");
                 }
                 if (isLegal(i - 1, j) && this->value[i - 1][j])
                     //look up and connect
                 {
                     int toIndex = this->map[i - 1][j];
-                    g.addEdge(fromIndex, toIndex, 0, "go up");
+                    g.addEdge(fromIndex, toIndex, 1, "go up");
                 }
             }
         }
     }
 }
 
-void maze::findPathRecursive(graph& g, int nodeIndex, bool& pathFound,
-                             stack<edge> pathAcc)
+stack<edge> maze::findPathRecursive(graph& g, int nodeIndex, bool& pathFound)
 // looks for a path between the start node and end node
 {
     //mark n as visted
@@ -180,60 +196,88 @@ void maze::findPathRecursive(graph& g, int nodeIndex, bool& pathFound,
     //check if current node is the final node
     if(g.isEnd(nodeIndex)) {
         pathFound = true;
-        while(!pathAcc.empty()) {
-            edge path = pathAcc.top();
-            pathAcc.pop();
-            cout << "help!";
-            path.printInstruction();
-        }
-        return;
+        stack<edge> s;
+        return s;
     }
 
 
     //create vector of neighbors
-    vector<edge> paths = g.getPaths(nodeIndex);
+    vector<edge> paths = g.getEdges(nodeIndex);
+
+    stack<edge> nodeOrder;
 
     //for each node w of node n
     for(auto path : paths) {
-        if(!g.isVisited(path.getDest())) {
-            pathAcc.push(path);
-            findPathRecursive(g, path.getDest(), pathFound, pathAcc);
-            if(!pathFound)
-                pathAcc.pop();
+        if(!g.isVisited(path.getDest()) && !pathFound) {
+            path.printInstruction();
+            nodeOrder = findPathRecursive(g, path.getDest(),
+                                                   pathFound);
+            if(pathFound)
+                nodeOrder.push(path);
+            else
+                cout << "go back" << endl;
         }
     }
+    return nodeOrder;
 }
 
-void maze::findPathNonRecursive(graph &g, int nodeIndex)
+
+stack<edge> maze::findPathNonRecursive(graph &g, int nodeIndex)
 // look for a path between the start node and the end node
 {
-    // reset the nodes in the graph
+    //reset the nodes in the graph
     g.unVisitAll();
 
-    // visit the first node
+    //declare DFS stack
+    stack<edge> mazePath;
+
+    //find the paths
+    vector<edge> startPath = g.getFirstNewEdge(nodeIndex);
     g.visit(nodeIndex);
 
-    // add the first node to the queue
-    queue<int> visitList;
-    visitList.push(nodeIndex);
+    if(!startPath.empty())
+        mazePath.push(startPath[0]);
 
-    while(!visitList.empty())
-    {
-        int currNode = visitList.front();
+    while(!mazePath.empty()) {
+        edge path = mazePath.top();
 
-        //find the current nodes neighbors
-        vector<edge> paths = g.getPaths(currNode);
+        g.visit(path.getSource(), path.getDest());
+        int dest = path.getDest();
 
-        for (auto path : paths)
-        {
-            if(!g.isVisited(path.getDest()))
-            {
-                g.visit(path.getDest());
-                visitList.push(path.getDest());
+        if(!g.isVisited(dest)) {
+            path.printInstruction();
+            if(g.isEnd(dest))
+                return mazePath;
+            g.visit(dest);
+            vector<edge> continuePath = g.getFirstNewEdge(dest);
+            if(!continuePath.empty())
+                mazePath.push(continuePath[0]);
+        }
+        else {
+            mazePath.pop();
+            vector<edge> continuePath = g.getFirstNewEdge(path.getSource());
+            if(!continuePath.empty())
+                mazePath.push(continuePath[0]);
+            else {
+                cout << "go back" << endl;
             }
         }
-        //remove this visited node from the queue
-        visitList.pop();
+    }
+    return mazePath;
+}
+
+pair<int, int> maze::nodeLookup(int n)
+// lookup the coordinates of the node on this object's map matrix
+{
+    for(int i = 0; i < this->rows; i++) {
+        for (int j = 0; j < this->cols; j++) {
+            if(this->map[i][j] == n)
+            {
+                pair<int, int> coordinates = make_pair(i,j);
+                return coordinates;
+            }
+        }
     }
 
+    throw rangeError("No coordinates for this node maze::nodeLookup");
 }
