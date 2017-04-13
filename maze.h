@@ -1,4 +1,10 @@
-// Project 5
+//This is the maze header file which was included for us on Blackboard
+//In addition to implimenting the functions given to us, we included both
+// recursive and non-recursive versions of the DFS algorithm, a function
+// which allows to us look up the index of a given node in the adjacency
+// matrix, and functions to return the length of the maze
+//
+
 
 #include <iostream>
 #include <limits.h>
@@ -131,19 +137,21 @@ int maze::getRows()
 }
 
 int maze::getCols()
-// return the number of rows in the maze
+// return the number of columns in the maze
 {
     return this->cols;
 }
-
 
 void maze::mapMazeToGraph(graph &g)
 // Create a graph g that represents the legal moves in the maze m.
 {
     //create the vector of nodes and update the map matrix for this maze
-    for (int i = 0; i < this->rows; i++) {
-        for (int j = 0; j < this->cols; j++) {
-            if (this->value[i][j]) {
+    for (int i = 0; i < this->rows; i++)
+    {
+        for (int j = 0; j < this->cols; j++)
+        {
+            if (this->value[i][j])
+            {
                 int index = g.addNode();
                 this->map[i][j] = index;
             }
@@ -153,29 +161,37 @@ void maze::mapMazeToGraph(graph &g)
     g.setEnd(g.numNodes() - 1);
 
     //create the matrix of edges for the graph
-    for (int i = 0; i < this->rows; i++) {
-        for (int j = 0; j < this->cols; j++) {
-            if (this->value[i][j]) {
+    for (int i = 0; i < this->rows; i++)
+    {
+        for (int j = 0; j < this->cols; j++)
+        {
+            if (this->value[i][j])
+            {
                 int fromIndex = this->map[i][j];
-                //check the adjacent nodes
+                //checks the adjacent nodes to determine which are valid
+                // directions to move from the node
+
                 if (isLegal(i, j + 1) && this->value[i][j + 1])
                     //look right and connect
                 {
                     int toIndex = this->map[i][j + 1];
                     g.addEdge(fromIndex, toIndex, 1, "go right");
                 }
+
                 if (isLegal(i, j - 1) && this->value[i][j - 1])
                     //look left and connect
                 {
                     int toIndex = this->map[i][j - 1];
                     g.addEdge(fromIndex, toIndex, 1, "go left");
                 }
+
                 if (isLegal(i + 1, j) && this->value[i + 1][j])
                     //look down and connect
                 {
                     int toIndex = this->map[i + 1][j];
                     g.addEdge(fromIndex, toIndex, 1, "go down");
                 }
+
                 if (isLegal(i - 1, j) && this->value[i - 1][j])
                     //look up and connect
                 {
@@ -190,11 +206,12 @@ void maze::mapMazeToGraph(graph &g)
 stack<edge> maze::findPathRecursive(graph& g, int nodeIndex, bool& pathFound)
 // looks for a path between the start node and end node
 {
-    //mark n as visted
+    //mark n as visited
     g.visit(nodeIndex);
 
     //check if current node is the final node
-    if(g.isEnd(nodeIndex)) {
+    if(g.isEnd(nodeIndex))
+    {
         pathFound = true;
         stack<edge> s;
         return s;
@@ -207,20 +224,25 @@ stack<edge> maze::findPathRecursive(graph& g, int nodeIndex, bool& pathFound)
     stack<edge> nodeOrder;
 
     //for each node w of node n
-    for(auto path : paths) {
-        if(!g.isVisited(path.getDest()) && !pathFound) {
-            path.printInstruction();
-            nodeOrder = findPathRecursive(g, path.getDest(),
-                                                   pathFound);
+    for(auto path : paths)
+    {
+        //checks to see that the path hasn't already been found and it can
+        // advance to node w
+        if(!g.isVisited(path.getDest()) && !pathFound)
+        {
+            path.printInstruction(); //prints out motion command
+            nodeOrder = findPathRecursive(g, path.getDest(), pathFound);
+
             if(pathFound)
                 nodeOrder.push(path);
+
             else
+                //a dead end was encountered, and the program is back-tracking
                 cout << "go back" << endl;
         }
     }
     return nodeOrder;
 }
-
 
 stack<edge> maze::findPathNonRecursive(graph &g, int nodeIndex)
 // look for a path between the start node and the end node
@@ -238,39 +260,64 @@ stack<edge> maze::findPathNonRecursive(graph &g, int nodeIndex)
     if(!startPath.empty())
         mazePath.push(startPath[0]);
 
-    while(!mazePath.empty()) {
-        edge path = mazePath.top();
+    //continuously looks to find a path to the destination node until no more
+    // moves are able to be made
+    while(!mazePath.empty())
+    {
 
+        edge path = mazePath.top();
         g.visit(path.getSource(), path.getDest());
         int dest = path.getDest();
 
-        if(!g.isVisited(dest)) {
+        //checks if the selected path has been travelled before
+        if(!g.isVisited(dest))
+        {
             path.printInstruction();
+
             if(g.isEnd(dest))
-                return mazePath;
+                break;
+
             g.visit(dest);
             vector<edge> continuePath = g.getFirstNewEdge(dest);
+
             if(!continuePath.empty())
                 mazePath.push(continuePath[0]);
         }
-        else {
+            //condition if selected path has already been travelld
+        else
+        {
             mazePath.pop();
             vector<edge> continuePath = g.getFirstNewEdge(path.getSource());
+
             if(!continuePath.empty())
                 mazePath.push(continuePath[0]);
-            else {
+
+            else
                 cout << "go back" << endl;
-            }
         }
     }
-    return mazePath;
+    stack<edge> reverseStack;
+
+    //since the stack mazePath stores values starting from the destination
+    // node, and has them accessable in reverse order, we use the
+    // reverseStack to flip the contents and return
+    while(!mazePath.empty())
+    {
+        edge e = mazePath.top();
+        mazePath.pop();
+        reverseStack.push(e);
+    }
+
+    return reverseStack;
 }
 
 pair<int, int> maze::nodeLookup(int n)
 // lookup the coordinates of the node on this object's map matrix
 {
-    for(int i = 0; i < this->rows; i++) {
-        for (int j = 0; j < this->cols; j++) {
+    for(int i = 0; i < this->rows; i++)
+    {
+        for (int j = 0; j < this->cols; j++)
+        {
             if(this->map[i][j] == n)
             {
                 pair<int, int> coordinates = make_pair(i,j);

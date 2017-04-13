@@ -1,19 +1,19 @@
+//This is the graph header file which was included for us on Blackboard
+// We made some modification based on our application of the maze as a graph,
+// including functions to set the end of our graph, get the edges associated
+// with a particular node, and a function to check the node neighbors
+
 #include <iostream>
 #include <fstream>
+#include <list>
+#include <stack>
 #include "d_matrix.h"
 #include "d_except.h"
 #include "node.h"
-//#include "edge.h"
-#include <list>
-#include <stack>
 
 using namespace std;
 
-typedef int WeightType;
 typedef int NodeType;
-
-//int const MaxNumNodex = 9999;
-
 typedef int NodeWeight;
 typedef int EdgeWeight;
 
@@ -553,8 +553,7 @@ bool graph::allNodesVisited()
 }
 
 bool graph::allNodesMarked()
-// Return true if all nodes have been marked.  Otherwise return
-// false.
+// Return true if all nodes have been marked. Otherwise, return false.
 {
    for (int i = 0; i < numNodes(); i++)
       if (!isMarked(i))
@@ -563,7 +562,9 @@ bool graph::allNodesMarked()
    return true;
 }
 
-vector<int> graph::getNeighbors(int n) {
+vector<int> graph::getNeighbors(int n)
+//retrieves all neighbors for a given node n
+{
     vector<int> neighbors;
 
     for(int i = 0; i < this->nodes.size(); i++) {
@@ -597,7 +598,7 @@ vector<edge> graph::getEdges(int n)
 
 vector<edge> graph::getFirstNewEdge(int n)
 // return a vector containing the first unvisited edge from the given node
-//   if none, return the empty vector
+// If none, return the empty vector
 {
    vector<edge> paths;
 

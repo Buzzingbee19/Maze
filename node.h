@@ -1,3 +1,5 @@
+//This is the node header file which was included for us on Blackboard
+
 #include <iostream>
 #include <fstream>
 #include "d_matrix.h"
@@ -100,7 +102,7 @@ int node::getId() const
 }
 
 void node::setNode(int id, NodeWeight w = 0, bool m = false, bool v = false)
-// Initialize a node;
+// Initializes a node
 {
    setId(id);
    setWeight(w);
@@ -117,43 +119,43 @@ void node::setNode(int id, NodeWeight w = 0, bool m = false, bool v = false)
 }
 
 void node::mark()
-   // Mark node.
+// Mark node.
 {
    marked = true;
 }
 
 void node::unMark()
-   // Un-mark node.
+// Un-mark node.
 {
    marked = false;
 }
 
 bool node::isMarked() const
-   // Return true if node is marked, and false otherwise.
+// Return true if node is marked, and false otherwise.
 {
    return marked;
 }
 
 void node::visit()
-   // Set visited to true;
+// Set visited to true;
 {
    visited = true;
 }
 
 void node::unVisit()
-   // Set visited to false;
+// Set visited to false;
 {
    visited = false;
 }
 
 bool node::isVisited() const
-   // Return true if node is visited, and false otherwise.
+// Return true if node is visited, and false otherwise.
 {
    return visited;
 }
 
-
 ostream &operator<<(ostream &ostr, const node &n)
+//controls formatted printing out of nodes, for debug information
 {
    ostr << "node: " << n.getId() << " weight: " << n.getWeight() 
         << " visited: " << n.isVisited() << " marked " << n.isMarked() << endl;
@@ -168,7 +170,7 @@ void node::setEnd()
 }
 
 bool node::getEnd()
-// is this the end node of the maze?
+// Determines if node is the end node of the maze
 {
     return this->endNode;
 }

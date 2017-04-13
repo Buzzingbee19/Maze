@@ -1,3 +1,5 @@
+//This is the edge header file which was included for us on Blackboard
+
 #include <iostream>
 #include <fstream>
 #include "d_matrix.h"
@@ -219,9 +221,10 @@ ostream &operator<<(ostream &ostr, const edge &e)
 }
 
 void edge::setInstructions(string instr)
-
+//stores the direction the edge is headed relative to its source and
+// destination nodes
 {
-   instructions = instr;
+   this->instructions = instr;
 }
 
 void edge::printInstruction()
