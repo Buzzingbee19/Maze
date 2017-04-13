@@ -27,7 +27,7 @@ class graph
     graph(const graph &);
     graph &operator=(const graph &);
 
-    void addEdge(int i, int j, NodeWeight w = 0);
+    void addEdge(int i, int j, NodeWeight w = 0, string instructions = "n/a");
     void removeEdge(int i, int j);
 
     int addNode(NodeWeight w = 0);
@@ -74,6 +74,10 @@ class graph
    bool allNodesVisited();
 
     vector<int> getNeighbors(int n);
+    void unVisitAll();
+    vector<edge> getPaths(int n);
+    void setEnd(int n);
+    bool isEnd(int n);
 
 
   private:
@@ -193,7 +197,7 @@ int graph::addNode(node n)
    return numNodes()-1;
 }
 
-void graph::addEdge(int i, int j, NodeWeight w)
+void graph::addEdge(int i, int j, NodeWeight w, string instructions)
 // Add an edge of weight w from node i to node j.  Throws an exception
 // if i or j is too small or large.  Does not allow duplicate edges
 // to be added.
@@ -201,8 +205,10 @@ void graph::addEdge(int i, int j, NodeWeight w)
    if (i < 0 || i >= numNodes() || j < 0 || j >= numNodes())
       throw rangeError("Bad value in graph::addEdge");
 
-   if (!isEdge(i,j))
-      edges[i][j] = edge(i,j,w);
+   if (!isEdge(i,j)) {
+      edges[i][j] = edge(i, j, w, instructions);
+      edges[i][j].setInstructions(instructions);
+   }
    NumEdges++;
 }
 
@@ -564,6 +570,39 @@ vector<int> graph::getNeighbors(int n) {
             neighbors.push_back(i);
         }
     }
-
     return neighbors;
 }
+
+void graph::unVisitAll()
+// clear the visited fields on every node in this graph
+{
+    for(node n : this->nodes) {
+        n.unVisit();
+    }
+}
+
+vector<edge> graph::getPaths(int n)
+// find all the paths out from the given node
+{
+   vector<edge> paths;
+
+   for(int i = 0; i < this->nodes.size(); i++) {
+      if(this->edges[n][i].isValid()) {
+         paths.push_back(this->edges[n][i]);
+      }
+   }
+   return paths;
+}
+
+void graph::setEnd(int n)
+// set the given node to the end node
+{
+   this->nodes[n].setEnd();
+}
+
+bool graph::isEnd(int n)
+// is this node the end node of the maze?
+{
+    return this->nodes[n].getEnd();
+}
+

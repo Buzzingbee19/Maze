@@ -38,11 +38,15 @@ class node
       void unVisit();
       bool isVisited() const;
 
+        void setEnd();
+        bool getEnd();
+
    private:
       int id;
       NodeWeight weight;
       bool marked;
       bool visited;
+      bool endNode;
 };
 
 node::node()
@@ -52,6 +56,7 @@ node::node()
    unMark();
    unVisit();
    setWeight(0);
+    endNode = false;
 }
 
 node::node(const node &n)
@@ -154,4 +159,16 @@ ostream &operator<<(ostream &ostr, const node &n)
         << " visited: " << n.isVisited() << " marked " << n.isMarked() << endl;
 
    return ostr;
+}
+
+void node::setEnd()
+// set this node to be the destination node
+{
+    this->endNode = true;
+}
+
+bool node::getEnd()
+// is this the end node of the maze?
+{
+    return this->endNode;
 }

@@ -8,6 +8,7 @@
 #include "d_matrix.h"
 #include "edge.h"
 #include "graph.h"
+#include <queue>
 
 using namespace std;
 
@@ -24,7 +25,9 @@ class maze
 
       bool isLegal(int i, int j);
 
-      void findPathRecursive(graph& g, int nodeIndex);
+      void findPathRecursive(graph& g, int nodeIndex, bool& pathFound, stack<edge> pathAcc);
+      void findPathNonRecursive(graph& g, int nodeIndex = 0);
+
 
    private:
       int rows; // number of rows in the maze
@@ -130,6 +133,8 @@ void maze::mapMazeToGraph(graph &g)
         }
     }
 
+    g.setEnd(g.numNodes() - 1);
+
     //create the matrix of edges for the graph
     for (int i = 0; i < this->rows; i++) {
         for (int j = 0; j < this->cols; j++) {
@@ -140,44 +145,95 @@ void maze::mapMazeToGraph(graph &g)
                     //look right and connect
                 {
                     int toIndex = this->map[i][j + 1];
-                    g.addEdge(fromIndex, toIndex);
+                    g.addEdge(fromIndex, toIndex, 0, "go right");
                 }
                 if (isLegal(i, j - 1) && this->value[i][j - 1])
                     //look left and connect
                 {
                     int toIndex = this->map[i][j - 1];
-                    g.addEdge(fromIndex, toIndex);
+                    g.addEdge(fromIndex, toIndex, 0, "go left");
                 }
                 if (isLegal(i + 1, j) && this->value[i + 1][j])
-                    //look up and connect
-                {
-                    int toIndex = this->map[i + 1][j];
-                    g.addEdge(fromIndex, toIndex);
-                }
-                if (isLegal(i - 1, j) && this->value[i - 1][j])
                     //look down and connect
                 {
+                    int toIndex = this->map[i + 1][j];
+                    g.addEdge(fromIndex, toIndex, 0, "go down");
+                }
+                if (isLegal(i - 1, j) && this->value[i - 1][j])
+                    //look up and connect
+                {
                     int toIndex = this->map[i - 1][j];
-                    g.addEdge(fromIndex, toIndex);
+                    g.addEdge(fromIndex, toIndex, 0, "go up");
                 }
             }
         }
     }
 }
 
-void maze::findPathRecursive(graph& g, int nodeIndex)
+void maze::findPathRecursive(graph& g, int nodeIndex, bool& pathFound,
+                             stack<edge> pathAcc)
 // looks for a path between the start node and end node
 {
     //mark n as visted
     g.visit(nodeIndex);
 
+    //check if current node is the final node
+    if(g.isEnd(nodeIndex)) {
+        pathFound = true;
+        while(!pathAcc.empty()) {
+            edge path = pathAcc.top();
+            pathAcc.pop();
+            cout << "help!";
+            path.printInstruction();
+        }
+        return;
+    }
+
+
     //create vector of neighbors
-    vector<int> neighbors = g.getNeighbors(nodeIndex);
+    vector<edge> paths = g.getPaths(nodeIndex);
 
     //for each node w of node n
-    for(auto neighbor : neighbors) {
-        if(!g.isVisited(neighbor)) {
-            findPathRecursive(g, neighbor);
+    for(auto path : paths) {
+        if(!g.isVisited(path.getDest())) {
+            pathAcc.push(path);
+            findPathRecursive(g, path.getDest(), pathFound, pathAcc);
+            if(!pathFound)
+                pathAcc.pop();
         }
     }
+}
+
+void maze::findPathNonRecursive(graph &g, int nodeIndex)
+// look for a path between the start node and the end node
+{
+    // reset the nodes in the graph
+    g.unVisitAll();
+
+    // visit the first node
+    g.visit(nodeIndex);
+
+    // add the first node to the queue
+    queue<int> visitList;
+    visitList.push(nodeIndex);
+
+    while(!visitList.empty())
+    {
+        int currNode = visitList.front();
+
+        //find the current nodes neighbors
+        vector<edge> paths = g.getPaths(currNode);
+
+        for (auto path : paths)
+        {
+            if(!g.isVisited(path.getDest()))
+            {
+                g.visit(path.getDest());
+                visitList.push(path.getDest());
+            }
+        }
+        //remove this visited node from the queue
+        visitList.pop();
+    }
+
 }

@@ -19,7 +19,7 @@ class edge
 {
    public:
       edge();
-      edge(int, int, EdgeWeight = 0);
+      edge(int, int, EdgeWeight = 0, string instructions = "n/a");
       edge(const edge &);
       edge &operator=(const edge &);   
 
@@ -42,6 +42,8 @@ class edge
       bool isVisited() const;
 
       void setEdge(int, int, EdgeWeight);
+      void setInstructions(string instructions);
+      void printInstruction();
 
    private:
       int source;
@@ -50,6 +52,7 @@ class edge
       bool valid;         // equals true if edge is valid, otherwise the
       bool visited;
       bool marked;
+      string instructions;
       // edge is invalid
 };
 
@@ -61,13 +64,14 @@ edge::edge()
    unVisit();
 }
 
-edge::edge(int i, int j, EdgeWeight w)
+edge::edge(int i, int j, EdgeWeight w, string instructions)
 // Constructor creates an edge with weight w, and marks the edge as valid, unvisited
 // and unmarked.
 {
    setEdge(i,j,w);
    unMark();
    unVisit();
+   setInstructions(instructions);
 }
 
 edge::edge(const edge &e)
@@ -210,4 +214,16 @@ ostream &operator<<(ostream &ostr, const edge &e)
 	<< " marked " << e.isMarked() << endl;
 
    return ostr;
+}
+
+void edge::setInstructions(string instr)
+
+{
+   instructions = instr;
+}
+
+void edge::printInstruction()
+//print out the instructions contained in the edge
+{
+    cout << this->instructions << endl;
 }

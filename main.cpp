@@ -32,9 +32,11 @@ int main()
             maze m(fin);
             m.print(6,9,1,0);
             m.mapMazeToGraph(g);
-            m.findPathRecursive(g, 0);
 
-
+            bool pathFound = false;
+            stack<edge> pathToDest;
+            m.findPathRecursive(g, 0, pathFound, pathToDest);
+            m.findPathNonRecursive(g);
         }
 
         cout << "test";
