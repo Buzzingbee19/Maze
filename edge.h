@@ -10,7 +10,7 @@ using namespace std;
 typedef int WeightType;
 typedef int NodeType;
 
-int const MaxNumNodex = 9999;
+//int const MaxNumNodex = 9999;
 
 typedef int NodeWeight;
 typedef int EdgeWeight;

@@ -30,9 +30,14 @@ int main()
         while (fin && fin.peek() != 'Z')
         {
             maze m(fin);
+            m.print(6,9,1,0);
+            m.mapMazeToGraph(g);
+            m.findPathRecursive(g, 0);
+
+
         }
 
-
+        cout << "test";
     }
     catch (indexRangeError &ex)
     {

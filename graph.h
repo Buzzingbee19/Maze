@@ -3,7 +3,7 @@
 #include "d_matrix.h"
 #include "d_except.h"
 #include "node.h"
-#include "edge.h"
+//#include "edge.h"
 #include <list>
 #include <stack>
 
@@ -21,47 +21,48 @@ typedef int EdgeWeight;
 class graph
 {
   public:
-   graph();
-   graph(int n);
-   graph(ifstream &fin);
-   graph(const graph &);
-   graph &operator=(const graph &);   
+    graph();
+    graph(int n);
+    graph(ifstream &fin);
+    graph(const graph &);
+    graph &operator=(const graph &);
 
-   void addEdge(int i, int j, NodeWeight w = 0);
-   void removeEdge(int i, int j);
+    void addEdge(int i, int j, NodeWeight w = 0);
+    void removeEdge(int i, int j);
 
-   int addNode(NodeWeight w = 0);
-   int addNode(node n);
+    int addNode(NodeWeight w = 0);
+    int addNode(node n);
 
-   void setEdgeWeight(int i, int j, EdgeWeight w = 0);
-   EdgeWeight getEdgeWeight(int i, int j) const;
+    void setEdgeWeight(int i, int j, EdgeWeight w = 0);
+    EdgeWeight getEdgeWeight(int i, int j) const;
 
-   NodeWeight getTotalNodeWeight();
-   EdgeWeight getTotalEdgeWeight();
+    NodeWeight getTotalNodeWeight();
+    EdgeWeight getTotalEdgeWeight();
 
-   void setNodeWeight(int i, NodeWeight w = 0);
-   NodeWeight getNodeWeight(int i) const;
+    void setNodeWeight(int i, NodeWeight w = 0);
+    NodeWeight getNodeWeight(int i) const;
 
-   bool isEdge(NodeType i, NodeType j) const;
-   int numNodes() const;
-   int numEdges() const;
-   
-   node &getNode(int);
-   const node &getNode(int) const;
-   edge &getEdge(int i,int j);
-   const edge &getEdge(int i, int j) const;
+    bool isEdge(NodeType i, NodeType j) const;
+    int numNodes() const;
+    int numEdges() const;
 
-   void printNodes() const;
-   void printEdges() const;
+    node &getNode(int);
+    const node &getNode(int) const;
+    edge &getEdge(int i,int j);
+    const edge &getEdge(int i, int j) const;
 
-   void mark(int i);
-   void mark(int i, int j);
-   void unMark(int i);
-   void unMark(int i, int j);
-   bool isMarked(int i) const;
-   bool isMarked(int i, int j) const;
-   void clearMark();
-   bool allNodesMarked();
+    void printNodes() const;
+    void printEdges() const;
+
+    void mark(int i);
+    void mark(int i, int j);
+    void unMark(int i);
+    void unMark(int i, int j);
+    bool isMarked(int i) const;
+    bool isMarked(int i, int j) const;
+    void clearMark();
+    bool allNodesMarked();
+
 
    void visit(int i);
    void visit(int i, int j);
@@ -72,11 +73,13 @@ class graph
    void clearVisit();
    bool allNodesVisited();
 
+    vector<int> getNeighbors(int n);
+
+
   private:
    matrix<edge> edges;
    vector<node> nodes;
    int NumEdges;
-
 };
 
 graph::graph()
@@ -101,7 +104,7 @@ graph::graph(ifstream &fin)
 {
    int n, i, j, w;
    fin >> n;
-   
+
    // Add nodes.
    for (int i = 0; i < n; i++)
       addNode();
@@ -124,8 +127,8 @@ graph::graph(const graph &g)
    // new nodes.  This avoids the exception that is thrown by
    // node::setId which is called by the node copy constructor.  The
    // temporary node is overwritten later in this function.
-   
-   node tempNode;       
+
+   node tempNode;
    tempNode.setId(0);
 
    nodes.resize(g.numNodes(),tempNode);
@@ -135,12 +138,12 @@ graph::graph(const graph &g)
    for (int i = 0; i < numNodes(); i++)
       nodes[i] = g.nodes[i];
 
-   // Copy the edges using the overloaded assignment operator.  
-   for (int i = 0; i < numNodes(); i++) 
-      for (int j = 0; j < numNodes(); j++) 
-	 edges[i][j] = g.edges[i][j]; 
+   // Copy the edges using the overloaded assignment operator.
+   for (int i = 0; i < numNodes(); i++)
+      for (int j = 0; j < numNodes(); j++)
+	 edges[i][j] = g.edges[i][j];
 }
-   
+
 graph &graph::operator=(const graph &g)
 // Graph assignment operator.
 {
@@ -148,8 +151,8 @@ graph &graph::operator=(const graph &g)
    // new nodes.  This avoids the exception that is thrown by
    // node::setId which is called by the node copy constructor.  The
    // temporary node is overwritten later in this function.
-   
-   node tempNode;       
+
+   node tempNode;
    tempNode.setId(0);
 
    nodes.resize(g.numNodes(),tempNode);
@@ -172,7 +175,7 @@ int graph::addNode(NodeWeight w)
 // matrix.  Return the index of the new node.
 {
    node n;
-   n.setNode(numNodes(),w);
+   n.setNode(numNodes(), w, false, false);
    nodes.push_back(n);
 
    edges.resize(numNodes(),numNodes());
@@ -267,7 +270,7 @@ NodeWeight graph::getTotalNodeWeight()
 // Return the total node weight.
 {
    NodeWeight weight = 0;
-   
+
    for (int i = 0; i < numNodes(); i++)
       weight = weight + nodes[i].getWeight();
 
@@ -278,7 +281,7 @@ EdgeWeight graph::getTotalEdgeWeight()
 // Return the total edge weight.
 {
    EdgeWeight weight = 0;
-   
+
    for (int i = 0; i < numNodes(); i++)
       for (int j = 0; j < numNodes(); j++)
          if (isEdge(i,j))
@@ -309,7 +312,7 @@ int graph::numEdges() const
 {
    return NumEdges;
 }
-   
+
 void graph::printNodes() const
 // Print all nodes.
 {
@@ -344,7 +347,7 @@ ostream &operator<<(ostream &ostr, const graph &g)
    return ostr;
 }
 
-node &graph::getNode(int i) 
+node &graph::getNode(int i)
 // Return a reference to the ith node.  Throws an exception if i is
 // too small or too large.
 {
@@ -364,7 +367,7 @@ const node &graph::getNode(int i) const
    return nodes[i];
 }
 
-edge &graph::getEdge(int i, int j) 
+edge &graph::getEdge(int i, int j)
 // Return a reference to the edge connecting nodes i and j.  If i is
 // too small or too large, or if the edge does not exist, throws an
 // exception.
@@ -437,7 +440,7 @@ bool graph::isMarked(int i) const
 
    return nodes[i].isMarked();
 }
-   
+
 bool graph::isMarked(int i, int j) const
 // Return true if edge (i,j) node is marked.  Otherwise return false.
 // Throws an exception if (i,j) is not an edge.
@@ -447,7 +450,7 @@ bool graph::isMarked(int i, int j) const
 
    return edges[i][j].isMarked();
 }
-   
+
 void graph::clearMark()
 // Set all nodes and edges as unmarked.
 {
@@ -508,7 +511,7 @@ bool graph::isVisited(int i) const
       throw rangeError("Bad value in graph::getEdge");
    return nodes[i].isVisited();
 }
-   
+
 bool graph::isVisited(int i, int j) const
 // Return true if edge (i,j) has been visited.  Otherwise return
 // false.  Throws an exception if (i,j) is not an edge.
@@ -518,7 +521,7 @@ bool graph::isVisited(int i, int j) const
 
    return edges[i][j].isVisited();
 }
-   
+
 void graph::clearVisit()
 // Set all nodes and edges as unvisited.
 {
@@ -551,4 +554,16 @@ bool graph::allNodesMarked()
 	 return false;
 
    return true;
+}
+
+vector<int> graph::getNeighbors(int n) {
+    vector<int> neighbors;
+
+    for(int i = 0; i < this->nodes.size(); i++) {
+        if(this->edges[i][n].isValid()) {
+            neighbors.push_back(i);
+        }
+    }
+
+    return neighbors;
 }
