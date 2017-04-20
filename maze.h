@@ -34,10 +34,14 @@ class maze
       stack<edge> findPathRecursive(graph& g, int nodeIndex, bool& pathFound);
       stack<edge> findPathNonRecursive(graph& g, int nodeIndex = 0);
 
+        bool findShortestPath1(graph& g);
+        bool findShortestPath2(graph& g);
+
         pair<int, int> nodeLookup(int n);
         int getRows();
         int getCols();
 
+        void printSteps(stack<int> &path);
 
    private:
       int rows; // number of rows in the maze
@@ -283,7 +287,7 @@ stack<edge> maze::findPathNonRecursive(graph &g, int nodeIndex)
             if(!continuePath.empty())
                 mazePath.push(continuePath[0]);
         }
-            //condition if selected path has already been travelld
+            //condition if selected path has already been traveled
         else
         {
             mazePath.pop();
@@ -299,7 +303,7 @@ stack<edge> maze::findPathNonRecursive(graph &g, int nodeIndex)
     stack<edge> reverseStack;
 
     //since the stack mazePath stores values starting from the destination
-    // node, and has them accessable in reverse order, we use the
+    // node, and has them accessible in reverse order, we use the
     // reverseStack to flip the contents and return
     while(!mazePath.empty())
     {
@@ -309,6 +313,150 @@ stack<edge> maze::findPathNonRecursive(graph &g, int nodeIndex)
     }
 
     return reverseStack;
+}
+
+bool maze::findShortestPath1(graph& g) {
+
+    //reset the nodes in the graph
+    g.unVisitAll();
+
+    // queue of the paths to check as we search
+    queue<edge> pathList;
+
+    //initialize the path tracking map
+    vector<int> cameFromNode(g.numNodes() - 1);
+
+    // add the paths from the first node
+    vector<edge> nextEdge = g.getFirstNewEdge(0);
+
+    // push all outward edges into the queue
+    while (!nextEdge.empty()) {
+        edge e = nextEdge[0];
+        cameFromNode[e.getDest()] = e.getSource();
+        pathList.push(e);
+        nextEdge = g.getFirstNewEdge(0);
+    }
+
+    while (!pathList.empty()) {
+        // grab the first path from the front of the queue
+        edge currEdge = pathList.front();
+        pathList.pop();
+
+        // set the index of the destination ndoe
+        int dest = currEdge.getDest();
+
+        // neighbor has not been visited
+        if (!g.isVisited(dest)) {
+            //print instructions
+            currEdge.printInstruction();
+
+            //visit this destination node
+            g.visit(dest);
+
+            // push all of the paths from the destination node into the queue
+            nextEdge = g.getFirstNewEdge(dest);
+
+            while (!nextEdge.empty()) {
+                edge e = nextEdge[0];
+                cameFromNode[e.getDest()] = e.getSource();
+                pathList.push(e);
+                nextEdge = g.getFirstNewEdge(dest);
+            }
+
+            //if the destination of the current edge is the end, break
+            if (g.isEnd(dest)) {
+                cout << endl << "Path from BFS" << endl;
+                // generate a stack for the printing function
+                int currNode = dest;
+
+                stack<int> pathToEnd;
+                while (currNode != 0) {
+                    pathToEnd.push(currNode);
+                    currNode = cameFromNode[currNode];
+                }
+
+                pathToEnd.push(currNode);
+
+                printSteps(pathToEnd);
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool maze::findShortestPath2(graph& g)
+{
+    //reset the nodes in the graph
+    g.unVisitAll();
+
+    //initialize the path tracking map
+    vector<int> cameFromNode(g.numNodes() - 1);
+
+    // create a vector with pairs that have all the distances set to INF
+    vector<int> nodeDists(g.numNodes() - 1);
+
+    for (int i = 1; i < g.numNodes(); i++)
+    {
+        nodeDists[i] = g.numNodes() + 10;
+    }
+
+    //create a priority queue for with the distances
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+
+    pair<int, int> src = make_pair(0,0);
+
+    pq.push(src);
+
+    while(!pq.empty())
+    {
+        int dist = pq.top().first;
+        int currNode = pq.top().second;
+        pq.pop();
+
+
+        // add the paths from the first node
+        vector<edge> nextEdge = g.getFirstNewEdge(currNode);
+
+        // push all outward edges into the queue
+        while (!nextEdge.empty()) {
+            edge e = nextEdge[0];
+            int dest = e.getDest();
+            cameFromNode[dest] = e.getSource();
+
+            if (nodeDists[dest] > nodeDists[e.getSource()] + 1) {
+                nodeDists[dest] = nodeDists[e.getSource()] + 1;
+                pq.push(make_pair(nodeDists[dest], dest));
+            }
+
+            //if the destination of the current edge is the end, break
+            if (g.isEnd(dest)) {
+                cout << endl << "Path from Dijkstra's Algo" << endl;
+                // generate a stack for the printing function
+                int currNode = dest;
+
+                stack<int> pathToEnd;
+                while (currNode != 0) {
+                    pathToEnd.push(currNode);
+                    currNode = cameFromNode[currNode];
+                }
+
+                pathToEnd.push(currNode);
+
+                printSteps(pathToEnd);
+
+                return true;
+            }
+
+            nextEdge = g.getFirstNewEdge(currNode);
+        }
+    }
+
+    // no path found
+    return false;
+
 }
 
 pair<int, int> maze::nodeLookup(int n)
@@ -327,4 +475,24 @@ pair<int, int> maze::nodeLookup(int n)
     }
 
     throw rangeError("No coordinates for this node maze::nodeLookup");
+}
+
+void maze::printSteps(stack<int> &path)
+//controls printing of the path through the maze
+{
+    //determines if a path exists for the graph
+    if(path.empty())
+        cout << "No path exists" << endl;
+
+    //prints out a correct path to traverse the maze using graph nodes
+    while(!path.empty())
+    {
+        int nodeStep = path.top();
+        path.pop();
+
+        pair<int, int> coordinates = nodeLookup(nodeStep);
+
+        print(this->rows - 1, this->cols - 1, coordinates.first,
+                coordinates.second);
+    }
 }

@@ -580,6 +580,9 @@ void graph::unVisitAll()
 {
     for(int i = 0; i < numNodes(); i++) {
        unVisit(i);
+       for (int j = 0; j < numNodes(); j++) {
+          this->edges[i][j].unVisit();
+       }
     }
 }
 
@@ -606,6 +609,7 @@ vector<edge> graph::getFirstNewEdge(int n)
       if(this->edges[n][i].isValid() && !this->edges[n][i].isVisited()) {
          paths.push_back(this->edges[n][i]);
          this->edges[n][i].visit();
+          this->edges[i][n].visit();
          return paths;
       }
    }
