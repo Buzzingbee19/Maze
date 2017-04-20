@@ -118,7 +118,7 @@ public:
         ostrstream dateErr(dateStr, 80);
 
         dateErr << first << ' ' << v << ' ' << last << ends;
-        // dateError can modify msgString, since it is in
+        // dateEror can modify msgString, since it is in
         // the protected section of baseException
         msgString = dateStr;
     }

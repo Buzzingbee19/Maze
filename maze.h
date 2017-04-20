@@ -315,7 +315,9 @@ stack<edge> maze::findPathNonRecursive(graph &g, int nodeIndex)
     return reverseStack;
 }
 
-bool maze::findShortestPath1(graph& g) {
+bool maze::findShortestPath1(graph& g)
+//solves for the shortest path using a BFS approach
+{
 
     //reset the nodes in the graph
     g.unVisitAll();
@@ -328,16 +330,19 @@ bool maze::findShortestPath1(graph& g) {
 
     // add the paths from the first node
     vector<edge> nextEdge = g.getFirstNewEdge(0);
+    stack<int> pathToEnd;
 
     // push all outward edges into the queue
-    while (!nextEdge.empty()) {
+    while (!nextEdge.empty())
+    {
         edge e = nextEdge[0];
         cameFromNode[e.getDest()] = e.getSource();
         pathList.push(e);
         nextEdge = g.getFirstNewEdge(0);
     }
 
-    while (!pathList.empty()) {
+    while (!pathList.empty())
+    {
         // grab the first path from the front of the queue
         edge currEdge = pathList.front();
         pathList.pop();
@@ -346,17 +351,17 @@ bool maze::findShortestPath1(graph& g) {
         int dest = currEdge.getDest();
 
         // neighbor has not been visited
-        if (!g.isVisited(dest)) {
-            //print instructions
-            currEdge.printInstruction();
-
+        if (!g.isVisited(dest))
+        {
             //visit this destination node
             g.visit(dest);
 
             // push all of the paths from the destination node into the queue
             nextEdge = g.getFirstNewEdge(dest);
 
-            while (!nextEdge.empty()) {
+            //finds all the neighbors of a given node
+            while (!nextEdge.empty())
+            {
                 edge e = nextEdge[0];
                 cameFromNode[e.getDest()] = e.getSource();
                 pathList.push(e);
@@ -364,30 +369,29 @@ bool maze::findShortestPath1(graph& g) {
             }
 
             //if the destination of the current edge is the end, break
-            if (g.isEnd(dest)) {
+            if (g.isEnd(dest))
+            {
                 cout << endl << "Path from BFS" << endl;
                 // generate a stack for the printing function
                 int currNode = dest;
 
-                stack<int> pathToEnd;
-                while (currNode != 0) {
+                while (currNode != 0)
+                {
                     pathToEnd.push(currNode);
                     currNode = cameFromNode[currNode];
                 }
-
                 pathToEnd.push(currNode);
-
                 printSteps(pathToEnd);
-
                 return true;
             }
         }
     }
-
+    printSteps(pathToEnd);
     return false;
 }
 
 bool maze::findShortestPath2(graph& g)
+//solves for the shortest path using Dijkstra's algorithm
 {
     //reset the nodes in the graph
     g.unVisitAll();
@@ -398,16 +402,14 @@ bool maze::findShortestPath2(graph& g)
     // create a vector with pairs that have all the distances set to INF
     vector<int> nodeDists(g.numNodes() - 1);
 
+    stack<int> pathToEnd;
+
     for (int i = 1; i < g.numNodes(); i++)
-    {
         nodeDists[i] = g.numNodes() + 10;
-    }
 
     //create a priority queue for with the distances
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
-
     pair<int, int> src = make_pair(0,0);
-
     pq.push(src);
 
     while(!pq.empty())
@@ -416,45 +418,45 @@ bool maze::findShortestPath2(graph& g)
         int currNode = pq.top().second;
         pq.pop();
 
-
         // add the paths from the first node
         vector<edge> nextEdge = g.getFirstNewEdge(currNode);
 
         // push all outward edges into the queue
-        while (!nextEdge.empty()) {
+        while (!nextEdge.empty())
+        {
             edge e = nextEdge[0];
             int dest = e.getDest();
             cameFromNode[dest] = e.getSource();
 
-            if (nodeDists[dest] > nodeDists[e.getSource()] + 1) {
+            if (nodeDists[dest] > nodeDists[e.getSource()] + 1)
+            {
                 nodeDists[dest] = nodeDists[e.getSource()] + 1;
                 pq.push(make_pair(nodeDists[dest], dest));
             }
 
             //if the destination of the current edge is the end, break
-            if (g.isEnd(dest)) {
+            if (g.isEnd(dest))
+            {
                 cout << endl << "Path from Dijkstra's Algo" << endl;
                 // generate a stack for the printing function
                 int currNode = dest;
 
-                stack<int> pathToEnd;
-                while (currNode != 0) {
+                while (currNode != 0)
+                {
                     pathToEnd.push(currNode);
                     currNode = cameFromNode[currNode];
                 }
 
                 pathToEnd.push(currNode);
-
                 printSteps(pathToEnd);
-
                 return true;
             }
-
             nextEdge = g.getFirstNewEdge(currNode);
         }
-    }
+    } //end of the while(!pq.empty()) floop
 
     // no path found
+    printSteps(pathToEnd);
     return false;
 
 }
